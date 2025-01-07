@@ -1,41 +1,27 @@
 package net.superkat.watercaustics;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.world.BiomeColors;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.OverlayVertexConsumer;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.ModelBaker;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
 import net.superkat.watercaustics.config.CausticConfig;
 import org.joml.Matrix4f;
 
@@ -63,34 +49,21 @@ public class WaterCausticRenderer {
                 if(shouldRenderWaterCaustic(world, pos)) {
 //                    if(!consumerCreated) {
                     immediate = (VertexConsumerProvider.Immediate) consumers;
-//                        consumer = immediate.getBuffer(RenderLayer.getTranslucent());
-//                        renderLayer = WaterCaustics.WATER_CAUSTICS_SPRITE.getRenderLayer(RenderLayer::getEntityTranslucent);
-//                        consumer = new OverlayVertexConsumer(
-//                                immediate.getBuffer(renderLayer), matrixStack.peek(), 1f
-//                        );
-//                        consumer = immediate.getBuffer(TexturedRenderLayers.getEntityCutout());
-//                    renderLayer = WaterCaustics.WATER_CAUSTICS_SPRITE.getRenderLayer(identifier -> WaterCaustics.WATER_CAUSTIC);
-//                        consumer = WaterCaustics.WATER_CAUSTICS_SPRITE.getVertexConsumer(consumers, identifier -> WaterCaustics.WATER_CAUSTIC);
-//                        consumer = new OverlayVertexConsumer(
-//                                WaterCaustics.WATER_CAUSTICS_SPRITE.getVertexConsumer(consumers, identifier -> WaterCaustics.WATER_CAUSTIC), matrixStack.peek(), 1f
-//                        );
                     matrixStack.push();
                     Vec3d target = Vec3d.of(pos.add(0, -1, 0));
                     Vec3d transformedPos = target.subtract(camera.getPos());
                     matrixStack.translate(transformedPos);
-//                    consumer = new OverlayVertexConsumer(
-//                            consumers.getBuffer(ModelBaker.BLOCK_DESTRUCTION_RENDER_LAYERS.getFirst()), matrixStack.peek(), 1f
-//                    );
-//                    consumer = WaterCaustics.WATER_CAUSTICS_SPRITE.getVertexConsumer(consumers, RenderLayer::getEntitySolid);
-//                    consumer = consumers.getBuffer(RenderLayer.getBlockBreaking(Identifier.of(WaterCaustics.MOD_ID, "snail.png")));
-
-                    Identifier texture = WaterCaustics.WATER_CAUSTIC_ANIMATION.getFirst();
 
                     consumer = new OverlayVertexConsumer(
-                        consumers.getBuffer(WaterCaustics.WATER_TWO.apply(texture)), matrixStack.peek(), 1f
+                        consumers.getBuffer(WaterCaustics.WATER_TWO.apply(Identifier.of(WaterCaustics.MOD_ID, "textures/animation/water1.png"))), matrixStack.peek(), 1f
                     );
-//                    consumer = new OverlayVertexConsumer(
-//                            consumers.getBuffer(WaterCaustics.WATER_TWO.apply(WaterCaustics.WATER_CAUSTICS_SPRITE.getAtlasId())), matrixStack.peek(), 1f
+
+//                    consumer = new OverlaySpriteVertexConsumer(
+//                        consumers.getBuffer(
+//                                WaterCaustics.WATER_TWO.apply(WaterCaustics.WATER_CAUSTICS_SPRITE.getSprite().getAtlasId())
+//                        ),
+//                        matrixStack.peek(),
+//                        WaterCaustics.WATER_CAUSTICS_SPRITE.getSprite()
 //                    );
                     consumerCreated = true;
 //                    }
