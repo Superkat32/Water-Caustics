@@ -17,11 +17,12 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
+import net.superkat.watercaustics.animation.WaterCausticAnimationTicker;
 import net.superkat.watercaustics.config.CausticConfig;
 import org.joml.Matrix4f;
 
@@ -54,17 +55,13 @@ public class WaterCausticRenderer {
                     Vec3d transformedPos = target.subtract(camera.getPos());
                     matrixStack.translate(transformedPos);
 
-                    consumer = new OverlayVertexConsumer(
-                        consumers.getBuffer(WaterCaustics.WATER_TWO.apply(Identifier.of(WaterCaustics.MOD_ID, "textures/animation/water1.png"))), matrixStack.peek(), 1f
-                    );
-
-//                    consumer = new OverlaySpriteVertexConsumer(
-//                        consumers.getBuffer(
-//                                WaterCaustics.WATER_TWO.apply(WaterCaustics.WATER_CAUSTICS_SPRITE.getSprite().getAtlasId())
-//                        ),
-//                        matrixStack.peek(),
-//                        WaterCaustics.WATER_CAUSTICS_SPRITE.getSprite()
+//                    consumer = new OverlayVertexConsumer(
+//                        consumers.getBuffer(WaterCausticAnimationTicker.WATER_CAUSTIC_RENDER_LAYER_FANCY.apply(Identifier.of(WaterCaustics.MOD_ID, "textures/animation/water1.png"))), matrixStack.peek(), 1f
 //                    );
+//                    consumer = WaterCausticAnimationTicker.getWaterCausticVertexConsumer(consumers);
+                    consumer = new OverlayVertexConsumer(
+                            consumers.getBuffer(WaterCausticAnimationTicker.WATER_CAUSTIC_FANCY_RENDER_LAYERS.get(WaterCausticAnimationTicker.frame)), matrixStack.peek(), 1.0F
+                    );
                     consumerCreated = true;
 //                    }
 
@@ -86,6 +83,7 @@ public class WaterCausticRenderer {
 //        RenderSystem.enableBlend();
 //        RenderSystem.enableDepthTest();
 //        MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().enable();
+//        camera = MinecraftClient.getInstance().gameRenderer.getCamera();
 
         matrixStack.push();
 
@@ -98,16 +96,20 @@ public class WaterCausticRenderer {
         BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
         BakedModel bakedModel = blockRenderManager.getModel(state);
         long l = state.getRenderingSeed(aPos);
-        Sprite sprite = WaterCaustics.WATER_CAUSTICS_SPRITE.getSprite();
-        int u = sprite.getX();
-        int v = sprite.getY();
-        float u1 = sprite.getFrameU(0.0F);
-        float u2 = sprite.getFrameU(1.0F);
-        float v1 = sprite.getFrameV(0.0F);
-        float v2 = sprite.getFrameV(1.0F);
+//        Sprite sprite = WaterCaustics.WATER_CAUSTICS_SPRITE.getSprite();
+//        int u = sprite.getX();
+//        int v = sprite.getY();
+//        float u1 = sprite.getFrameU(0.0F);
+//        float u2 = sprite.getFrameU(1.0F);
+//        float v1 = sprite.getFrameV(0.0F);
+//        float v2 = sprite.getFrameV(1.0F);
+
+//        sprite.getTextureSpecificVertexConsumer()
 
 //        Vec3d target = Vec3d.of(aPos);
 //        Vec3d transformedPos = target.subtract(camera.getPos());
+//        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180f));
 //        matrixStack.translate(transformedPos);
         blockRenderManager.getModelRenderer().render(world, bakedModel, state, aPos, matrixStack, consumer, true, Random.create(), l, OverlayTexture.DEFAULT_UV);
 
@@ -132,7 +134,7 @@ public class WaterCausticRenderer {
         return isWater(world, pos.offset(offsetDirection));
     }
 
-    private static void render(ClientWorld world, BlockPos pos, Camera camera, MatrixStack matrixStack, VertexConsumer vertexConsumer) {
+    public static void render(ClientWorld world, BlockPos pos, Camera camera, MatrixStack matrixStack, VertexConsumer vertexConsumer) {
 //        float x = (float)(pos.getX() & 15);
 //        float y = (float)(pos.getY() & 15);
 //        float z = (float)(pos.getZ() & 15);
@@ -167,11 +169,11 @@ public class WaterCausticRenderer {
         float v1 = sprite.getFrameV(0.0F);
         float v2 = sprite.getFrameV(1.0F);
 
-//        Vec3d target = Vec3d.of(pos);
-//        Vec3d transformedPos = target.subtract(camera.getPos());
-//        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180f));
-//        matrixStack.translate(transformedPos);
+        Vec3d target = Vec3d.of(pos);
+        Vec3d transformedPos = target.subtract(camera.getPos());
+        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180f));
+        matrixStack.translate(transformedPos);
 
         Matrix4f posMatrix = matrixStack.peek().getPositionMatrix();
 
