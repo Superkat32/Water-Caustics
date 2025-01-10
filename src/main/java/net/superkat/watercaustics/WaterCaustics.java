@@ -2,6 +2,7 @@ package net.superkat.watercaustics;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
@@ -24,7 +25,7 @@ public class WaterCaustics implements ModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			WaterCausticAnimationTicker.tickAnimation();
 		});
-//		WorldRenderEvents.AFTER_ENTITIES.register(WaterCausticRenderer::renderWaterCaustics);
+		WorldRenderEvents.AFTER_ENTITIES.register(WaterCausticRenderer::renderWaterCaustics);
 
 //		WorldRenderEvents.END.register(context -> {
 //			MinecraftClient client = MinecraftClient.getInstance();
