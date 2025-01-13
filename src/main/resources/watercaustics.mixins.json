@@ -2,10 +2,10 @@
   "required": true,
   "package": "net.superkat.watercaustics.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "FluidRendererMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "SectionBuilderMixin"
+  ]
 }
