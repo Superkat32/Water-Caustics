@@ -14,6 +14,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
 import net.superkat.watercaustics.WaterCaustics;
+import net.superkat.watercaustics.render.WaterCausticRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -41,6 +42,6 @@ public abstract class SectionBuilderMixin {
     ) {
         original.call(instance, pos, world, vertexConsumer, blockState, fluidState);
 
-        WaterCaustics.renderWaterCaustic(world, pos, vertexConsumer, blockState, fluidState, WaterCaustics.getLight(world, pos));
+        WaterCausticRenderer.renderWaterCaustic(world, pos, vertexConsumer, blockState, fluidState, WaterCausticRenderer.getLight(world, pos));
     }
 }

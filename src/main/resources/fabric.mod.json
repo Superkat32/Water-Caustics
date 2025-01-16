@@ -16,7 +16,12 @@
 	"icon": "assets/watercaustics/icon.png",
 	"environment": "*",
 	"entrypoints": {
-
+		"main": [
+			"net.superkat.watercaustics.WaterCaustics"
+		],
+		"modmenu": [
+			"net.superkat.watercaustics.config.ModMenuInt"
+		]
 	},
 	"mixins": [
 		"watercaustics.mixins.json"
