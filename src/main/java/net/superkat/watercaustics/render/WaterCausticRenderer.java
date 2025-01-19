@@ -1,19 +1,24 @@
 package net.superkat.watercaustics.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.BlockRenderView;
 import net.superkat.watercaustics.WaterCaustics;
 import net.superkat.watercaustics.config.CausticConfig;
+import org.joml.Matrix4f;
+
+import java.awt.*;
 
 public class WaterCausticRenderer {
 
@@ -88,16 +93,64 @@ public class WaterCausticRenderer {
         float y = (float)(pos.getY() & 15);
         float z = (float)(pos.getZ() & 15);
 
+        int waterColor = BiomeColors.getWaterColor(world, pos);
+        Color causticColor = Color.decode(CausticConfig.causticColor);
+        float red, green, blue;
+        float waterRed = 1, waterGreen = 1, waterBlue = 1;
+        float causticRed, causticGreen, causticBlue;
+
+        causticRed = causticColor.getRed() / 255f;
+        causticGreen = causticColor.getGreen() / 255f;
+        causticBlue = causticColor.getBlue() / 255f;
+        if(!CausticConfig.colorOverride) {
+            waterRed = (float)(waterColor >> 16 & 0xFF) / 255.0F;
+            waterGreen = (float)(waterColor >> 8 & 0xFF) / 255.0F;
+            waterBlue = (float)(waterColor & 0xFF) / 255.0F;
+        }
+
+        red = waterRed * causticRed;
+        green = waterGreen * causticGreen;
+        blue = waterBlue * causticBlue;
+
         Sprite sprite = WaterCaustics.SPRITE.getSprite();
         float u1 = sprite.getFrameU(0.0F);
         float u2 = sprite.getFrameU(1.0F);
         float v1 = sprite.getFrameV(0.0F);
         float v2 = sprite.getFrameV(1.0F);
 
-        vertex(vertexConsumer, x + 0, y, z + 0, u1, v1, light);
-        vertex(vertexConsumer, x + 0, y, z + 1, u1, v2, light);
-        vertex(vertexConsumer, x + 1, y, z + 1, u2, v2, light);
-        vertex(vertexConsumer, x + 1, y, z + 0, u2, v1, light);
+        MatrixStack matrices = new MatrixStack();
+        //.001 to avoid z-fighting - can't be too little otherwise it still z-fights at a distance(somehow)
+        matrices.translate(x, y + 0.001f, z);
+        matrices.push();
+
+        quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+        if(CausticConfig.fancyRendering) {
+            //north
+            matrices.translate(0f, -1.001f, -0.001f);
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+
+            //west
+            matrices.translate(-0.001f, -1, 0);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90));
+            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+
+            //south
+            matrices.translate(-0.002f, -1, 0);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90));
+            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+
+            //east
+            matrices.translate(-0.002f, -1, 0);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90));
+            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+
+            matrices.translate(0, -1, -0.001f);
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
+            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+
+        }
+        matrices.pop();
     }
 
 //    private static void renderFabulous(BlockRenderView world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, int light) {
@@ -129,10 +182,19 @@ public class WaterCausticRenderer {
 //                );
 //    }
 
-    private static void vertex(VertexConsumer vertexConsumer, float x, float y, float z, float u, float v, int light) {
+    private static void quad(VertexConsumer vertexConsumer, MatrixStack matrices, float x, float y, float z, float u1, float u2, float v1, float v2, float red, float green, float blue, int light) {
+        Matrix4f pos = matrices.peek().getPositionMatrix();
+        vertex(vertexConsumer, pos, x + 0, y, z + 0, u1, v1, red, green, blue, light);
+        vertex(vertexConsumer, pos, x + 0, y, z + 1, u1, v2, red, green, blue, light);
+        vertex(vertexConsumer, pos, x + 1, y, z + 1, u2, v2, red, green, blue, light);
+        vertex(vertexConsumer, pos, x + 1, y, z + 0, u2, v1, red, green, blue, light);
+    }
+
+    private static void vertex(VertexConsumer vertexConsumer, Matrix4f pos, float x, float y, float z, float u, float v, float red, float green, float blue, int light) {
         vertexConsumer
-                .vertex(x, y, z)
-                .color(0.9F, 0.95F, 1.0F, 0.35f)
+                .vertex(pos, x, y, z)
+//                .color(0.9F, 0.95F, 1.0F, 0.35f)
+                .color(red, green, blue, 0.35f)
                 .texture(u, v)
                 .light(light)
                 .normal(0.0F, 1.0F, 0.0F);
