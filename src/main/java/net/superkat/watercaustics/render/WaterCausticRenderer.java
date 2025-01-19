@@ -93,7 +93,6 @@ public class WaterCausticRenderer {
         float y = (float)(pos.getY() & 15);
         float z = (float)(pos.getZ() & 15);
 
-        int waterColor = BiomeColors.getWaterColor(world, pos);
         Color causticColor = Color.decode(CausticConfig.causticColor);
         float red, green, blue;
         float waterRed = 1, waterGreen = 1, waterBlue = 1;
@@ -103,14 +102,21 @@ public class WaterCausticRenderer {
         causticGreen = causticColor.getGreen() / 255f;
         causticBlue = causticColor.getBlue() / 255f;
         if(!CausticConfig.colorOverride) {
+            int waterColor = BiomeColors.getWaterColor(world, pos);
             waterRed = (float)(waterColor >> 16 & 0xFF) / 255.0F;
             waterGreen = (float)(waterColor >> 8 & 0xFF) / 255.0F;
             waterBlue = (float)(waterColor & 0xFF) / 255.0F;
         }
 
-        red = waterRed * causticRed;
-        green = waterGreen * causticGreen;
-        blue = waterBlue * causticBlue;
+        if(CausticConfig.customBlending) {
+            red = waterRed * 0.5f * causticRed;
+            green = waterGreen * 0.8f * causticGreen;
+            blue = waterBlue * 0.8f * causticBlue;
+        } else {
+            red = waterRed * causticRed;
+            green = waterGreen * causticGreen;
+            blue = waterBlue * causticBlue;
+        }
 
         Sprite sprite = WaterCaustics.SPRITE.getSprite();
         float u1 = sprite.getFrameU(0.0F);

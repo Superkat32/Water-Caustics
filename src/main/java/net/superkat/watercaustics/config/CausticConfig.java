@@ -13,6 +13,7 @@ public class CausticConfig extends MidnightConfig {
     @Entry(category = RENDERING) public static int glassFalloffDistance = 12;
     @Entry(category = RENDERING) public static boolean colorOverride = false;
     @Entry(category = RENDERING, isColor = true) public static String causticColor = "#ffffff";
+    @Entry(category = RENDERING) public static boolean customBlending = true;
 
     @Entry(category = EXTRAS) public static boolean modEnabled = true;
 
