@@ -108,7 +108,7 @@ public class WaterCausticRenderer {
             waterBlue = (float)(waterColor & 0xFF) / 255.0F;
         }
 
-        if(CausticConfig.customBlending) {
+        if(CausticConfig.customColorBlending) {
             red = waterRed * 0.5f * causticRed;
             green = waterGreen * 0.8f * causticGreen;
             blue = waterBlue * 0.8f * causticBlue;

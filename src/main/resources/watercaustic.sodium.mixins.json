@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.superkat.watercaustics.compat.sodium",
+  "plugin": "net.superkat.watercaustics.compat.SodiumMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "FluidRendererImplMixin"
+  ]
+}

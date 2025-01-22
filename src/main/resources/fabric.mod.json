@@ -24,7 +24,8 @@
 		]
 	},
 	"mixins": [
-		"watercaustics.mixins.json"
+		"watercaustics.mixins.json",
+		"watercaustic.sodium.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.9",
@@ -33,6 +34,6 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"sodium": "*"
 	}
 }
