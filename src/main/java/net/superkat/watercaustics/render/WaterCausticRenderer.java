@@ -126,67 +126,42 @@ public class WaterCausticRenderer {
 
         MatrixStack matrices = new MatrixStack();
         //.001 to avoid z-fighting - can't be too little otherwise it still z-fights at a distance(somehow)
-        matrices.translate(x, y + 0.001f, z);
         matrices.push();
+        matrices.translate(x, y + 0.001f, z);
+
+        //TODO - fix hackyness on the corners here (apparently possible from the initial translation only)
+        //TODO - Check side blocks first before beginning to render this (look at Sodium's water rendering code)
+        //TODO - Something to do with not calculating the colors every time this is rendered
+
+        //This has not been fixed, in fact I'd say I made it worse because I know I'm going to update it later therefore I wasted time on it but whatever
 
         quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
         if(CausticConfig.fancyRendering) {
-            //north
-            matrices.translate(0f, -1.001f, -0.001f);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
-            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+            //south
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90f));
+            quad(vertexConsumer, matrices, 0, 1.001f, 0, u1, u2, v1, v2, red, green, blue, light);
 
             //west
-            matrices.translate(-0.001f, -1, 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90));
-            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90f));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90f));
+            quad(vertexConsumer, matrices, -1, 0.001f, 0, u1, u2, v1, v2, red, green, blue, light);
 
-            //south
-            matrices.translate(-0.002f, -1, 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90));
-            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+            //north
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90f));
+            quad(vertexConsumer, matrices, 0, 0.001f, -1, u1, u2, v1, v2, red, green, blue, light);
 
             //east
-            matrices.translate(-0.002f, -1, 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90));
-            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-90f));
+            quad(vertexConsumer, matrices, 0, 1.001f, -1, u1, u2, v1, v2, red, green, blue, light);
 
-            matrices.translate(0, -1, -0.001f);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
-            quad(vertexConsumer, matrices, 0, 0, 0, u1, u2, v1, v2, red, green, blue, light);
+            //bottom - 1.002 because of the .001 from the initial translation
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            quad(vertexConsumer, matrices, 0, 1.002f, 0, u1, u2, v1, v2, red, green, blue, light);
 
         }
         matrices.pop();
     }
-
-//    private static void renderFabulous(BlockRenderView world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, int light) {
-//        MinecraftClient client = MinecraftClient.getInstance();
-//        Camera camera = client.gameRenderer.getCamera();
-//
-//        Vec3d target = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
-//        Vec3d transPos = target.subtract(camera.getPos());
-//        MatrixStack matrices = new MatrixStack();
-//        matrices.multiply(RotationAxis.POSITIVE_X.rotation(camera.getPitch()));
-//        matrices.multiply(RotationAxis.POSITIVE_Y.rotation(camera.getYaw() + 180f));
-//        matrices.translate(transPos);
-//
-//        BakedModel model = client.getBlockRenderManager().getModel(blockState);
-//
-//        client.getBlockRenderManager()
-//                .getModelRenderer()
-//                .render(
-//                        world,
-//                        model,
-//                        blockState,
-//                        pos,
-//                        matrices,
-//                        vertexConsumer,
-//                        false,
-//                        Random.create(),
-//                        blockState.getRenderingSeed(pos),
-//                        OverlayTexture.DEFAULT_UV
-//                );
-//    }
 
     private static void quad(VertexConsumer vertexConsumer, MatrixStack matrices, float x, float y, float z, float u1, float u2, float v1, float v2, float red, float green, float blue, int light) {
         Matrix4f pos = matrices.peek().getPositionMatrix();
@@ -199,7 +174,6 @@ public class WaterCausticRenderer {
     private static void vertex(VertexConsumer vertexConsumer, Matrix4f pos, float x, float y, float z, float u, float v, float red, float green, float blue, int light) {
         vertexConsumer
                 .vertex(pos, x, y, z)
-//                .color(0.9F, 0.95F, 1.0F, 0.35f)
                 .color(red, green, blue, 0.35f)
                 .texture(u, v)
                 .light(light)
